@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student CV and Cover Letter Maker</title>
+<style>
+:root{--ink:#14213d;--bg:#eef0f4;--line:#d5d9e2;--accent:#0f766e;--accent-d:#0b5b55;--warn:#b42318}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+header{background:var(--ink);color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:18px;font-weight:700}
+.bar{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;border-radius:6px}
+button:hover{border-color:var(--ink)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f2c230;outline-offset:1px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.primary:hover{background:var(--accent-d)}
+header button{background:transparent;color:#fff;border-color:#5b6785}
+header button.primary{background:var(--accent);border-color:var(--accent)}
+main{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px;padding:20px;max-width:1280px;margin:0 auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+#editor{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;align-self:start}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs button{flex:1}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+fieldset{border:0;margin:0 0 16px;padding:0}
+legend{font-weight:700;padding:0;margin-bottom:6px}
+label{display:block;font-size:13px;margin:8px 0 2px;color:#4a5570}
+input,textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+.entry{border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;margin-bottom:8px;background:#fafbfd}
+.entry .rm{float:right;font-size:12px;padding:2px 8px;color:var(--warn)}
+.hint{font-size:13px;color:#4a5570;margin:0 0 8px}
+#paperWrap{min-width:0}
+#paper{background:#fff;max-width:794px;margin:0 auto;min-height:1000px;padding:44px 48px;box-shadow:0 1px 3px rgba(20,33,61,.18);font:14px/1.45 Georgia,"Times New Roman",serif;color:#1a1a1a}
+#paper h1{font-size:30px;margin:0;letter-spacing:.3px;color:var(--ink)}
+#paper .role{font-size:16px;color:var(--accent);margin-top:2px}
+#paper .contact{font-size:13px;color:#444;margin:6px 0 4px;word-break:break-word}
+#paper h2{font-size:14px;margin:18px 0 6px;padding-bottom:3px;border-bottom:2px solid var(--ink);color:var(--ink)}
+#paper .row{display:flex;justify-content:space-between;gap:12px}
+#paper .row span{white-space:nowrap;color:#444}
+#paper ul{margin:3px 0 8px;padding-left:20px}
+#paper p{margin:0 0 10px}
+#paper .item{margin-bottom:8px}
+#paper .empty{color:#8a93a8;font-style:italic}
+.letter p{margin:0 0 14px}
+.letter .head{margin-bottom:22px}
+footer{text-align:center;padding:10px 20px 24px;font-size:13px;color:#4a5570}
+@media print{
+  footer{display:none}
+  @page{size:A4;margin:12mm}
+  body{background:#fff}
+  header,#editor{display:none}
+  main{display:block;padding:0}
+  #paper{box-shadow:none;max-width:none;padding:0;min-height:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Student CV and Cover Letter Maker</h1>
+  <div class="bar">
+    <button id="btnExample" type="button">Load example</button>
+    <button id="btnClear" type="button">Clear all</button>
+    <button id="btnPrint" class="primary" type="button">Print or save as PDF</button>
+  </div>
+</header>
+
+<main>
+<section id="editor" aria-label="Your details">
+  <div class="tabs" role="tablist">
+    <button type="button" data-tab="cv" class="on">CV</button>
+    <button type="button" data-tab="cl">Cover letter</button>
+  </div>
+
+  <div id="cvForm">
+    <fieldset>
+      <legend>About you</legend>
+      <label for="name">Full name</label><input id="name" data-k="name" autocomplete="name">
+      <label for="title">Short title (for example: Information Systems Student)</label><input id="title" data-k="title">
+      <label for="email">Email</label><input id="email" data-k="email" type="email" autocomplete="email">
+      <label for="phone">Phone</label><input id="phone" data-k="phone" type="tel" autocomplete="tel">
+      <label for="city">City</label><input id="city" data-k="city">
+      <label for="link">Link (GitHub, LinkedIn, or portfolio)</label><input id="link" data-k="link">
+    </fieldset>
+    <fieldset>
+      <legend>Summary</legend>
+      <p class="hint">Two or three sentences: who you are, what you study, what job you want.</p>
+      <textarea id="summary" data-k="summary"></textarea>
+    </fieldset>
+    <fieldset><legend>Education</legend><div id="list-edu"></div><button type="button" data-add="edu">Add education</button></fieldset>
+    <fieldset><legend>Projects</legend><div id="list-proj"></div><button type="button" data-add="proj">Add project</button></fieldset>
+    <fieldset><legend>Experience, volunteering, or training</legend><div id="list-exp"></div><button type="button" data-add="exp">Add experience</button></fieldset>
+    <fieldset>
+      <legend>Skills</legend>
+      <p class="hint">Separate with commas.</p>
+      <textarea id="skills" data-k="skills"></textarea>
+    </fieldset>
+    <fieldset>
+      <legend>Languages</legend>
+      <label for="langs">For example: Afaan Oromoo (native), Amharic (fluent), English (good)</label>
+      <input id="langs" data-k="langs">
+    </fieldset>
+  </div>
+
+  <div id="clForm" hidden>
+    <fieldset>
+      <legend>The job</legend>
+      <label for="company">Company name</label><input id="company" data-k="company">
+      <label for="position">Position you apply for</label><input id="position" data-k="position">
+      <label for="manager">Hiring manager name (leave empty if you do not know)</label><input id="manager" data-k="manager">
+    </fieldset>
+    <fieldset>
+      <legend>Your letter</legend>
+      <p class="hint">Fill the CV first, then press the button to get a draft. Edit the text so it sounds like you.</p>
+      <button type="button" id="btnDraft" class="primary">Write a draft for me</button>
+      <label for="p1">Paragraph 1: why you are applying</label><textarea id="p1" data-k="p1"></textarea>
+      <label for="p2">Paragraph 2: what you can do for them</label><textarea id="p2" data-k="p2"></textarea>
+    </fieldset>
+  </div>
+</section>
+
+<section id="paperWrap" aria-label="Preview"><div id="paper"></div></section>
+</main>
+<footer>Made by Bayisa Tafese. Printing service: 09XX XXX XXX (change this line in index.html)</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const lines = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean);
+
+const LISTS = {
+  edu:  {fields: [['school','School or university'], ['degree','Degree or field'], ['years','Years (for example 2022–2026)']]},
+  proj: {fields: [['name','Project name'], ['desc','What it does and what you used','area']]},
+  exp:  {fields: [['role','Role'], ['org','Place'], ['years','Years'], ['details','What you did (one line each)','area']]}
+};
+const EMPTY = () => ({edu:[{}], proj:[], exp:[]});
+const EXAMPLE = {
+  name:'Abebe Kebede', title:'Information Systems Student', email:'abebe@example.com', phone:'+251 9XX XXX XXX', city:'Arba Minch, Ethiopia', link:'github.com/abebe',
+  summary:'Third-year Information Systems student who builds simple web applications with HTML, CSS, JavaScript, and databases. I want an internship where I can work on real business software and learn from a team.',
+  skills:'HTML, CSS, JavaScript, SQL, MySQL, Git, Microsoft Office, Teamwork',
+  langs:'Afaan Oromoo (native), Amharic (fluent), English (good)',
+  edu:[{school:'Wolaita Sodo University', degree:'BSc in Information Systems', years:'2022–2026'}],
+  proj:[{name:'Shop Stock Tracker', desc:'Web app that records products and sales and warns when stock is low. Built with HTML, CSS, JavaScript, and MySQL.'}],
+  exp:[{role:'Volunteer Computer Tutor', org:'Community Library', years:'2025', details:'Taught 20 students basic computer skills\nHelped the library keep a digital list of its books'}],
+  company:'Example Company', position:'Junior Web Developer', manager:'', p1:'', p2:''
+};
+
+let S = load();
+let tab = 'cv';
+
+function load(){ try { const d = JSON.parse(localStorage.getItem('cvdata')); if (d) return Object.assign(EMPTY(), d); } catch(e){} return EMPTY(); }
+function save(){ try { localStorage.setItem('cvdata', JSON.stringify(S)); } catch(e){} }
+
+function buildLists(){
+  for (const key in LISTS){
+    const box = $('#list-' + key);
+    box.innerHTML = S[key].map((item, i) =>
+      '<div class="entry"><button type="button" class="rm" data-rm="' + key + ':' + i + '">Remove</button>' +
+      LISTS[key].fields.map(([f, label, kind]) => {
+        const id = key + i + f;
+        const val = esc(item[f] || '');
+        return '<label for="' + id + '">' + label + '</label>' + (kind === 'area'
+          ? '<textarea id="' + id + '" data-l="' + key + '" data-i="' + i + '" data-f="' + f + '">' + val + '</textarea>'
+          : '<input id="' + id + '" data-l="' + key + '" data-i="' + i + '" data-f="' + f + '" value="' + val + '">');
+      }).join('') + '</div>').join('');
+  }
+}
+function fillSimple(){ document.querySelectorAll('[data-k]').forEach(el => el.value = S[el.dataset.k] || ''); }
+
+function sec(title, html){ return html ? '<h2>' + title + '</h2>' + html : ''; }
+
+function drawCV(){
+  const contact = [S.email, S.phone, S.city, S.link].filter(Boolean).map(esc).join('  |  ');
+  const edu = S.edu.filter(e => e.school || e.degree).map(e =>
+    '<div class="item"><div class="row"><b>' + esc(e.school) + '</b><span>' + esc(e.years) + '</span></div><div>' + esc(e.degree) + '</div></div>').join('');
+  const proj = S.proj.filter(p => p.name || p.desc).map(p =>
+    '<div class="item"><b>' + esc(p.name) + '</b>' + (p.desc ? ' – ' + esc(p.desc) : '') + '</div>').join('');
+  const exp = S.exp.filter(x => x.role || x.org).map(x =>
+    '<div class="item"><div class="row"><b>' + esc(x.role) + (x.org ? ', ' + esc(x.org) : '') + '</b><span>' + esc(x.years) + '</span></div>' +
+    (lines(x.details).length ? '<ul>' + lines(x.details).map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' : '') + '</div>').join('');
+  const skills = (S.skills || '').split(',').map(s => s.trim()).filter(Boolean).map(esc).join(', ');
+  $('#paper').className = '';
+  $('#paper').innerHTML = (S.name || S.title || contact
+    ? '<h1>' + esc(S.name) + '</h1>' + (S.title ? '<div class="role">' + esc(S.title) + '</div>' : '') + '<div class="contact">' + contact + '</div>'
+    : '<p class="empty">Fill in the form on the left. Your CV appears here.</p>') +
+    sec('Summary', S.summary ? '<p>' + esc(S.summary) + '</p>' : '') +
+    sec('Education', edu) + sec('Projects', proj) + sec('Experience', exp) +
+    sec('Skills', skills ? '<p>' + skills + '</p>' : '') + sec('Languages', S.langs ? '<p>' + esc(S.langs) + '</p>' : '');
+}
+
+function drawLetter(){
+  const today = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  const contact = [S.email, S.phone, S.city].filter(Boolean).map(esc).join('<br>');
+  const para = t => lines(t).length ? '<p>' + esc(t).replace(/\n/g, '<br>') + '</p>' : '';
+  $('#paper').className = 'letter';
+  $('#paper').innerHTML =
+    '<div class="head"><b>' + esc(S.name) + '</b><br>' + contact + '</div>' +
+    '<p>' + today + '</p>' +
+    '<p>' + (S.company ? esc(S.company) + '<br>' : '') + 'Hiring Team</p>' +
+    '<p><b>Application for ' + esc(S.position || 'the open position') + '</b></p>' +
+    '<p>Dear ' + esc(S.manager || 'Hiring Manager') + ',</p>' +
+    para(S.p1) + para(S.p2) +
+    '<p>Thank you for your time. I have attached my CV and I would be glad to meet you for an interview at any time that suits you.</p>' +
+    '<p>Sincerely,<br><br>' + esc(S.name) + '</p>';
+}
+
+function draw(){ tab === 'cv' ? drawCV() : drawLetter(); }
+
+function draft(){
+  const e = S.edu[0] || {};
+  S.p1 = 'I am writing to apply for the ' + (S.position || '[position]') + ' position at ' + (S.company || '[company]') + '. I am a student of ' + (e.degree || '[your field]') + ' at ' + (e.school || '[your university]') + ', and I am excited about the chance to learn and contribute to your team.';
+  S.p2 = 'During my studies I have built practical skills in ' + ((S.skills || '[your skills]').trim()) + '. I learn quickly, I work well with others, and I finish what I start. I would bring the same attitude to this role.';
+  fillSimple(); save(); draw();
+}
+
+function setTab(t){
+  tab = t;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  $('#cvForm').hidden = t !== 'cv';
+  $('#clForm').hidden = t !== 'cl';
+  draw();
+}
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.k) S[t.dataset.k] = t.value;
+  else if (t.dataset.l) S[t.dataset.l][+t.dataset.i][t.dataset.f] = t.value;
+  else return;
+  save(); draw();
+});
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab) return setTab(b.dataset.tab);
+  if (b.dataset.add){ S[b.dataset.add].push({}); save(); buildLists(); return; }
+  if (b.dataset.rm){ const [k, i] = b.dataset.rm.split(':'); S[k].splice(+i, 1); save(); buildLists(); draw(); return; }
+  if (b.id === 'btnDraft') return draft();
+  if (b.id === 'btnPrint') return window.print();
+  if (b.id === 'btnExample'){ S = JSON.parse(JSON.stringify(Object.assign(EMPTY(), EXAMPLE))); draft(); buildLists(); fillSimple(); save(); draw(); return; }
+  if (b.id === 'btnClear'){ if (confirm('Delete everything you typed?')){ S = EMPTY(); save(); buildLists(); fillSimple(); draw(); } }
+});
+
+buildLists(); fillSimple(); draw();
+</script>
+</body>
+</html>
